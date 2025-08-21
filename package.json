@@ -1,8 +1,9 @@
 {
-  "name": "bananaflow-auth",
+  "name": "bananaflow-server",
   "version": "0.0.1",
   "description": "",
   "author": "",
+  "type": "commonjs",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
@@ -22,7 +23,10 @@
   "dependencies": {
     "@nestjs/common": "^11.0.1",
     "@nestjs/core": "^11.0.1",
+    "@nestjs/jwt": "^11.0.0",
     "@nestjs/platform-express": "^11.0.1",
+    "@typescript-eslint/eslint-plugin": "^8.40.0",
+    "@typescript-eslint/parser": "^8.40.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1"
   },
