@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
+import * as bcrypt from 'bcrypt';
 import { EntityManager, Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { CreateTenantAndAdminDto } from 'src/auth/dto/create-tenant-and-admin.dto';
@@ -21,9 +22,13 @@ export class UsersService {
     return this.userRepository.find();
   }
 
-  async findOneByUsername(username: string): Promise<User | null> {
+  async findOneByUsernameAndTenant(
+    username: string,
+    tenantId: string,
+  ): Promise<User | null> {
     const user = await this.userRepository.findOne({
-      where: { username: username },
+      where: { username: username, tenantId: tenantId },
+      relations: ['tenant'],
     });
     return user;
   }
@@ -33,10 +38,20 @@ export class UsersService {
     createTenantAndAdminDto: CreateTenantAndAdminDto,
     tenantId: string,
   ): Promise<User> {
-    const { adminEmail, adminPassword, adminName } = createTenantAndAdminDto;
+    const { adminEmail, adminPassword, adminName, adminUsername } =
+      createTenantAndAdminDto;
+    // const checkIfUserExists = await this.userRepository.findOne({
+    //   where: { email: adminEmail, tenantId: tenantId },
+    // });
+    // if (checkIfUserExists)
+    //   throw new BadRequestException('Email já cadastrado.');
+
+    const hashed = await bcrypt.hash(adminPassword, 10);
+
     const user = this.userRepository.create({
       name: adminName,
-      password: adminPassword,
+      username: adminUsername,
+      password: hashed,
       email: adminEmail,
       tenantId,
     });

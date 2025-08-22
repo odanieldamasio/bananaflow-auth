@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Headers, Post, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SignInDto } from './dto/sign-in.dto';
 import { CreateTenantAndAdminDto } from './dto/create-tenant-and-admin.dto';
@@ -8,8 +8,15 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('login')
-  signIn(@Body() signInDto: SignInDto) {
-    return this.authService.signIn(signInDto);
+  signIn(
+    @Body() signInDto: SignInDto,
+    @Headers('x-tenant-id') tenantId: string,
+  ) {
+    if (!tenantId) {
+      throw new UnauthorizedException('Tenant ID é obrigatório no header');
+    }
+
+    return this.authService.signIn(signInDto, tenantId);
   }
 
   @Post('register')

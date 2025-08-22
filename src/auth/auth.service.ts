@@ -5,6 +5,7 @@ import { JwtService } from '@nestjs/jwt';
 import { CreateTenantAndAdminDto } from './dto/create-tenant-and-admin.dto';
 import { DataSource } from 'typeorm';
 import { TenantsService } from 'src/tenants/tenants.service';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
@@ -15,18 +16,36 @@ export class AuthService {
     private readonly dataSource: DataSource,
   ) {}
 
-  async signIn(signInDto: SignInDto): Promise<any> {
-    const user = await this.usersService.findOneByUsername(signInDto.username);
-    if (user?.password !== signInDto.password) {
-      throw new UnauthorizedException();
+  async signIn(signInDto: SignInDto, tenantId: string): Promise<any> {
+    const user = await this.usersService.findOneByUsernameAndTenant(
+      signInDto.username,
+      tenantId,
+    );
+
+    if (!user) {
+      throw new UnauthorizedException('Usuário ou senha inválidos');
+    }
+
+    const userIsAuthenticated = await bcrypt.compare(
+      signInDto.password,
+      user.password,
+    );
+
+    if (!userIsAuthenticated) {
+      throw new UnauthorizedException('Usuário ou senha inválidos');
     }
 
     const { password, ...result } = user;
 
-    const payload = { sub: user.id, username: user.username };
+    const payload = {
+      sub: user.id,
+      email: user.email,
+      tenantId,
+    };
 
+    const accessToken = await this.jwtService.signAsync(payload);
     return {
-      access_token: await this.jwtService.signAsync(payload),
+      access_token: accessToken,
     };
   }
 
