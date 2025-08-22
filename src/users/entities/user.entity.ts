@@ -6,12 +6,13 @@ import {
   CreateDateColumn,
   ManyToOne,
   DeleteDateColumn,
+  JoinColumn,
 } from 'typeorm';
 
 @Entity()
 export class User {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column()
   name: string;
@@ -30,6 +31,9 @@ export class User {
 
   @DeleteDateColumn({ nullable: true })
   deletedAt?: Date;
+
+  @Column()
+  tenantId: string;
 
   @ManyToOne(() => Tenant, (tenant) => tenant.users, { onDelete: 'CASCADE' })
   tenant: Tenant;

@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
+import { CreateTenantAndAdminDto } from 'src/auth/dto/create-tenant-and-admin.dto';
 
 @Injectable()
 export class UsersService {
@@ -25,5 +26,21 @@ export class UsersService {
       where: { username: username },
     });
     return user;
+  }
+
+  async createUserManager(
+    manager: EntityManager,
+    createTenantAndAdminDto: CreateTenantAndAdminDto,
+    tenantId: string,
+  ): Promise<User> {
+    const { adminEmail, adminPassword, adminName } = createTenantAndAdminDto;
+    const user = this.userRepository.create({
+      name: adminName,
+      password: adminPassword,
+      email: adminEmail,
+      tenantId,
+    });
+
+    return manager.save(user);
   }
 }

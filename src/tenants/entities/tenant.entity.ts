@@ -10,8 +10,8 @@ import {
 
 @Entity()
 export class Tenant {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column({ unique: true })
   slug: string;
