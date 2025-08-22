@@ -1,29 +1,23 @@
-import { Tenant } from 'src/tenants/entities/tenant.entity';
+import { User } from 'src/users/entities/user.entity';
 import {
   Entity,
   Column,
   PrimaryGeneratedColumn,
   CreateDateColumn,
-  ManyToOne,
+  OneToMany,
   DeleteDateColumn,
 } from 'typeorm';
 
 @Entity()
-export class User {
+export class Tenant {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Column({ unique: true })
+  slug: string;
+
   @Column()
   name: string;
-
-  @Column()
-  username: string;
-
-  @Column({ unique: true })
-  email: string;
-
-  @Column()
-  password: string;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -31,6 +25,6 @@ export class User {
   @DeleteDateColumn({ nullable: true })
   deletedAt?: Date;
 
-  @ManyToOne(() => Tenant, (tenant) => tenant.users, { onDelete: 'CASCADE' })
-  tenant: Tenant;
+  @OneToMany(() => User, (user) => user.tenant)
+  users: User[];
 }

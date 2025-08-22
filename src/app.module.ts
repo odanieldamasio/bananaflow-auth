@@ -5,6 +5,8 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TenantsModule } from './tenants/tenants.module';
+import { TypeOrmConfigService } from './config/typeorm.config.service';
 
 @Module({
   imports: [
@@ -12,21 +14,12 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     UsersModule,
     ConfigModule.forRoot({
       isGlobal: true,
+      envFilePath: '.env',
     }),
     TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        type: 'postgres',
-        host: config.get<string>('DB_HOST'),
-        port: config.get<number>('DB_PORT'),
-        username: config.get<string>('DB_USER'),
-        password: config.get<string>('DB_PASS'),
-        database: config.get<string>('DB_NAME'),
-        autoLoadEntities: true,
-        synchronize: true,
-      }),
+      useClass: TypeOrmConfigService,
     }),
+    TenantsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
